@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	logrusAdapter "github.com/jackc/pgx-logrus"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -37,7 +40,11 @@ func New() DBService {
 	pgxCfg, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
+	}
 
+	pgxCfg.ConnConfig.Tracer = &tracelog.TraceLog{
+		Logger:   logrusAdapter.NewLogger(logrus.New()),
+		LogLevel: tracelog.LogLevelDebug,
 	}
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), pgxCfg)
