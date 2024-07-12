@@ -3,9 +3,9 @@ package user
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
+	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,9 +15,10 @@ func CreateUser(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	log.Println(req.Name)
-	log.Println(req.Email)
-	log.Println(req.Password)
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return ctx.Status(400).SendString(api.ErrPayload.Error())
+	}
 
 	err := Service.CreateUser(*req)
 	if err != nil {
@@ -36,6 +37,10 @@ func Login(ctx *fiber.Ctx) error {
 	req := new(User)
 	if err := ctx.BodyParser(req); err != nil {
 		return err
+	}
+	validationError := api.ValidateRequest(req)
+	if len(validationError) > 0 {
+		return api.SendErrorResponse(ctx, 400, validationError)
 	}
 
 	token, err := Service.Login(*req)

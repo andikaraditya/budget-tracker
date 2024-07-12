@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/andikaraditya/budget-tracker/backend/internal/source"
 	"github.com/andikaraditya/budget-tracker/backend/internal/user"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -19,6 +20,11 @@ func main() {
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte("secret")},
 	}))
+
+	app.Post("/sources", source.CreateSource)
+	app.Get("/sources", source.GetSources)
+	app.Get("/sources/:sourceId", source.GetSource)
+	app.Put("/sources/:sourceId", source.UpdateSource)
 
 	app.Listen(":3000")
 }
