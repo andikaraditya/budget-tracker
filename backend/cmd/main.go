@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/andikaraditya/budget-tracker/backend/internal/category"
 	"github.com/andikaraditya/budget-tracker/backend/internal/source"
 	"github.com/andikaraditya/budget-tracker/backend/internal/user"
 	jwtware "github.com/gofiber/contrib/jwt"
@@ -28,6 +29,11 @@ func main() {
 	app.Get("/sources", source.GetSources)
 	app.Get("/sources/:sourceId", source.GetSource)
 	app.Put("/sources/:sourceId", source.UpdateSource)
+
+	app.Post("/categories", category.CreateCategory)
+	app.Get("/categories", category.GetCategories)
+	app.Get("/categories/:categoryId", category.GetCategory)
+	app.Put("/categories/:categoryId", category.UpdateCategory)
 
 	app.Listen(":3000")
 }
