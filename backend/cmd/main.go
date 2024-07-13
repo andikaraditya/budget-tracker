@@ -3,10 +3,12 @@ package main
 import (
 	"github.com/andikaraditya/budget-tracker/backend/internal/category"
 	"github.com/andikaraditya/budget-tracker/backend/internal/source"
+	"github.com/andikaraditya/budget-tracker/backend/internal/transfer"
 	"github.com/andikaraditya/budget-tracker/backend/internal/user"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -16,6 +18,12 @@ func main() {
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
+	})
+
+	app.Get("/uuid", func(c *fiber.Ctx) error {
+		return c.Status(200).JSON(fiber.Map{
+			"uuid": uuid.NewString(),
+		})
 	})
 
 	app.Post("/register", user.CreateUser)
@@ -34,6 +42,11 @@ func main() {
 	app.Get("/categories", category.GetCategories)
 	app.Get("/categories/:categoryId", category.GetCategory)
 	app.Put("/categories/:categoryId", category.UpdateCategory)
+
+	app.Post("/transfers", transfer.CreateTransfer)
+	app.Get("/transfers", transfer.GetTransfers)
+	app.Get("/transfers/:transferId", transfer.GetTransfer)
+	app.Put("/transfers/:transferId", transfer.UpdateTransfer)
 
 	app.Listen(":3000")
 }

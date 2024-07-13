@@ -81,6 +81,8 @@ func (s *srv) getCategories() ([]Category, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var o Category
 		if err := rows.Scan(
