@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/andikaraditya/budget-tracker/backend/internal/category"
+	"github.com/andikaraditya/budget-tracker/backend/internal/record"
 	"github.com/andikaraditya/budget-tracker/backend/internal/source"
 	"github.com/andikaraditya/budget-tracker/backend/internal/transfer"
 	"github.com/andikaraditya/budget-tracker/backend/internal/user"
@@ -47,6 +48,11 @@ func main() {
 	app.Get("/transfers", transfer.GetTransfers)
 	app.Get("/transfers/:transferId", transfer.GetTransfer)
 	app.Put("/transfers/:transferId", transfer.UpdateTransfer)
+
+	app.Post("/records", record.CreateRecord)
+	app.Get("/records", record.GetRecords)
+	app.Get("/records/:recordId", record.GetRecord)
+	app.Put("/records/:recordId", record.UpdateRecord)
 
 	app.Listen(":3000")
 }

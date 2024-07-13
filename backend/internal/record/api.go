@@ -1,4 +1,4 @@
-package category
+package record
 
 import (
 	"errors"
@@ -8,33 +8,37 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateCategory(c *fiber.Ctx) error {
-	req := new(Category)
+func CreateRecord(c *fiber.Ctx) error {
+	req := new(Record)
 
 	if err := c.BodyParser(req); err != nil {
 		return c.Status(500).SendString("internal server error")
 	}
+
+	req.UserId = api.GetUserId(c)
 
 	validationError := api.ValidateRequest(req)
 	if len(validationError) > 0 {
 		return api.SendErrorResponse(c, 400, validationError)
 	}
 
-	err := Service.createCategory(req)
+	err := Service.createRecord(req)
 	if err != nil {
 		return c.Status(500).SendString("internal server error")
 	}
 	return c.Status(201).JSON(req)
 }
 
-func GetCategory(c *fiber.Ctx) error {
-	req := new(Category)
+func GetRecord(c *fiber.Ctx) error {
+	req := new(Record)
 
-	req.ID = c.Params("categoryId")
+	req.ID = c.Params("recordId")
 
-	if err := Service.getCategory(req); err != nil {
+	req.UserId = api.GetUserId(c)
+
+	if err := Service.getRecord(req); err != nil {
 		if errors.Is(err, api.ErrNotFound) {
-			return api.SendErrorResponse(c, 404, "category not found")
+			return api.SendErrorResponse(c, 404, "record not found")
 		}
 		fmt.Printf("ERROR: %v", err)
 		return api.SendErrorResponse(c, 500, "internal server error")
@@ -43,9 +47,10 @@ func GetCategory(c *fiber.Ctx) error {
 	return c.Status(200).JSON(req)
 }
 
-func GetCategories(c *fiber.Ctx) error {
+func GetRecords(c *fiber.Ctx) error {
+	userId := api.GetUserId(c)
 
-	result, err := Service.getCategories()
+	result, err := Service.getRecords(userId)
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)
 		return api.SendErrorResponse(c, 500, "internal server error")
@@ -54,8 +59,8 @@ func GetCategories(c *fiber.Ctx) error {
 	return c.Status(200).JSON(result)
 }
 
-func UpdateCategory(c *fiber.Ctx) error {
-	req := new(Category)
+func UpdateRecord(c *fiber.Ctx) error {
+	req := new(Record)
 
 	if err := c.BodyParser(req); err != nil {
 		return c.Status(500).SendString("internal server error")
@@ -66,9 +71,11 @@ func UpdateCategory(c *fiber.Ctx) error {
 		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
-	req.ID = c.Params("categoryId")
+	req.ID = c.Params("recordId")
 
-	if err := Service.updateCategory(req, updatedFields); err != nil {
+	req.UserId = api.GetUserId(c)
+
+	if err := Service.updateRecord(req, updatedFields); err != nil {
 		fmt.Printf("ERROR: %v", err)
 		return api.SendErrorResponse(c, 500, "internal server error")
 	}
