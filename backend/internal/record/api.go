@@ -82,3 +82,16 @@ func UpdateRecord(c *fiber.Ctx) error {
 	return c.Status(200).JSON(req)
 
 }
+
+func GetSummary(c *fiber.Ctx) error {
+	req := new(Summary)
+
+	userId := api.GetUserId(c)
+
+	if err := Service.getSummary(req, userId); err != nil {
+		fmt.Printf("ERROR: %v", err)
+		return api.SendErrorResponse(c, 500, "internal server error")
+	}
+
+	return c.Status(200).JSON(req)
+}

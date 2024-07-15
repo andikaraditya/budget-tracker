@@ -53,6 +53,7 @@ func main() {
 	app.Get("/records", record.GetRecords)
 	app.Get("/records/:recordId", record.GetRecord)
 	app.Put("/records/:recordId", record.UpdateRecord)
+	app.Get("/summary", record.GetSummary)
 
 	app.Listen(":3000")
 }
