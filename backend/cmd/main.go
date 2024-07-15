@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"time"
+
 	"github.com/andikaraditya/budget-tracker/backend/internal/category"
 	"github.com/andikaraditya/budget-tracker/backend/internal/record"
 	"github.com/andikaraditya/budget-tracker/backend/internal/source"
@@ -9,13 +12,23 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/google/uuid"
 )
 
 func main() {
 	app := fiber.New()
 
-	app.Use(logger.New())
+	app.Use(logger.New(logger.Config{
+		Format:        "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${queryParams} | ${error}\n",
+		TimeFormat:    "15:04:05",
+		TimeZone:      "Local",
+		TimeInterval:  500 * time.Millisecond,
+		Output:        os.Stdout,
+		DisableColors: false,
+	}))
+
+	app.Use(recover.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")

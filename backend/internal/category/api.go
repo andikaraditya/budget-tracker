@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
+	apiParams "github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -44,8 +45,9 @@ func GetCategory(c *fiber.Ctx) error {
 }
 
 func GetCategories(c *fiber.Ctx) error {
+	params := apiParams.GetParams(c)
 
-	result, err := Service.getCategories()
+	result, err := Service.getCategories(params)
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)
 		return api.SendErrorResponse(c, 500, "internal server error")

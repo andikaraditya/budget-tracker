@@ -98,3 +98,11 @@ func (s *impl) Commit(tx pgx.Tx, fn txFn) error {
 	}
 	return nil
 }
+
+func Order(asc bool) string {
+	if asc {
+		return OrderAsc
+	}
+
+	return OrderDesc
+}

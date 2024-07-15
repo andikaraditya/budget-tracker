@@ -9,6 +9,7 @@ import (
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
 	"github.com/andikaraditya/budget-tracker/backend/internal/db"
+	apiParams "github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -16,7 +17,7 @@ import (
 
 type SourceService interface {
 	createSource(req *Source) error
-	getSources(userId string) ([]Source, error)
+	getSources(userId string, params *apiParams.Params) ([]Source, error)
 	getSource(req *Source, userId string) error
 	updateSource(req *Source, updatedFields []string) error
 }
@@ -83,8 +84,13 @@ func (s *srv) createSource(req *Source) error {
 	return s.getSource(req, req.UserId)
 }
 
-func (s *srv) getSources(userId string) ([]Source, error) {
+func (s *srv) getSources(userId string, params *apiParams.Params) ([]Source, error) {
 	result := []Source{}
+
+	var sb strings.Builder
+	args := []any{userId}
+	args = params.ComposeFilter(&sb, args)
+
 	rows, err := s.db.Query(
 		`SELECT
 			id,
@@ -101,8 +107,8 @@ func (s *srv) getSources(userId string) ([]Source, error) {
 			created_at,
 			updated_at
 		FROM "source" s 
-		where user_id = $1;`,
-		userId,
+		where user_id = $1 `+sb.String()+params.Sorts.Compose()+params.Page.Compose(),
+		args...,
 	)
 	if err != nil {
 		return nil, err

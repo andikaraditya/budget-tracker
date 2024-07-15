@@ -9,6 +9,7 @@ import (
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
 	"github.com/andikaraditya/budget-tracker/backend/internal/db"
+	apiParams "github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -16,7 +17,7 @@ import (
 
 type TransferService interface {
 	createTransfer(req *Transfer) error
-	getTransfers(userId string) ([]Transfer, error)
+	getTransfers(userId string, params *apiParams.Params) ([]Transfer, error)
 	getTransfer(req *Transfer, userId string) error
 	updateTransfer(req *Transfer, updatedFields []string) error
 }
@@ -65,8 +66,13 @@ func (s *srv) createTransfer(req *Transfer) error {
 	return s.getTransfer(req, req.UserId)
 }
 
-func (s *srv) getTransfers(userId string) ([]Transfer, error) {
+func (s *srv) getTransfers(userId string, params *apiParams.Params) ([]Transfer, error) {
 	var t []Transfer
+
+	var sb strings.Builder
+	args := []any{userId}
+	args = params.ComposeFilter(&sb, args)
+
 	rows, err := s.db.Query(
 		`SELECT 
 			id,
@@ -101,8 +107,8 @@ func (s *srv) getTransfers(userId string) ([]Transfer, error) {
 				created_at,
 				updated_at
 		FROM transfer t 
-		WHERE t.user_id = $1`,
-		userId,
+		WHERE t.user_id = $1 `+sb.String()+params.Sorts.Compose()+params.Page.Compose(),
+		args...,
 	)
 	if err != nil {
 		return nil, err
