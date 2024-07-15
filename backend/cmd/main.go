@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/category"
-	"github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/andikaraditya/budget-tracker/backend/internal/record"
 	"github.com/andikaraditya/budget-tracker/backend/internal/source"
 	"github.com/andikaraditya/budget-tracker/backend/internal/transfer"
@@ -37,11 +35,6 @@ func main() {
 	})
 
 	app.Get("/uuid", func(c *fiber.Ctx) error {
-		params := params.GetParams(c)
-
-		fmt.Println("Pagination: ", params.Page)
-		fmt.Println("Filter: ", params.Filters)
-		fmt.Println("Sort: ", params.Sorts)
 		return c.Status(200).JSON(fiber.Map{
 			"uuid": uuid.NewString(),
 		})
