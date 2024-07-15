@@ -19,6 +19,7 @@ type RecordService interface {
 	getRecords(userId string) ([]Record, error)
 	getRecord(req *Record) error
 	updateRecord(req *Record, updatedFields []string) error
+	getSummary(req *Summary, userId string) error
 }
 
 type srv struct {
@@ -241,4 +242,29 @@ func (s *srv) updateRecord(req *Record, updatedFields []string) error {
 		return err
 	}
 	return s.getRecord(req)
+}
+
+func (s *srv) getSummary(req *Summary, userId string) error {
+	if err := s.db.QueryRow(
+		`WITH totals AS (
+			SELECT 
+				SUM(CASE WHEN r."type" = 'expense' THEN r.amount ELSE 0 END) AS expense,
+				SUM(CASE WHEN r."type" = 'income' THEN r.amount ELSE 0 END) AS income
+			FROM record r
+			WHERE r.user_id = $1
+		)
+		SELECT 
+			expense,
+			income,
+			(income - expense) AS total
+		FROM totals`,
+		userId,
+	).Scan(
+		&req.Expense,
+		&req.Income,
+		&req.Total,
+	); err != nil {
+		return err
+	}
+	return nil
 }
