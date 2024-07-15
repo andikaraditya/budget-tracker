@@ -9,6 +9,7 @@ import (
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
 	"github.com/andikaraditya/budget-tracker/backend/internal/db"
+	"github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -16,10 +17,10 @@ import (
 
 type RecordService interface {
 	createRecord(req *Record) error
-	getRecords(userId string) ([]Record, error)
+	getRecords(userId string, params *params.Params) ([]Record, error)
 	getRecord(req *Record) error
 	updateRecord(req *Record, updatedFields []string) error
-	getSummary(req *Summary, userId string) error
+	getSummary(req *Summary, userId string, params *params.Params) error
 }
 
 type srv struct {
@@ -72,8 +73,13 @@ func (s *srv) createRecord(req *Record) error {
 	return s.getRecord(req)
 }
 
-func (s *srv) getRecords(userId string) ([]Record, error) {
+func (s *srv) getRecords(userId string, params *params.Params) ([]Record, error) {
 	var r []Record
+
+	var sb strings.Builder
+	args := []any{userId}
+	args = params.ComposeFilter(&sb, args)
+
 	rows, err := s.db.Query(
 		`SELECT 
 			id,
@@ -112,8 +118,8 @@ func (s *srv) getRecords(userId string) ([]Record, error) {
 			created_at,
 			updated_at
 		FROM record r
-		WHERE r.user_id = $1`,
-		userId,
+		WHERE r.user_id = $1 `+sb.String()+params.Sorts.Compose()+params.Page.Compose(),
+		args...,
 	)
 	if err != nil {
 		return nil, err
@@ -244,21 +250,25 @@ func (s *srv) updateRecord(req *Record, updatedFields []string) error {
 	return s.getRecord(req)
 }
 
-func (s *srv) getSummary(req *Summary, userId string) error {
+func (s *srv) getSummary(req *Summary, userId string, params *params.Params) error {
+	var sb strings.Builder
+	args := []any{userId}
+	args = params.ComposeFilter(&sb, args)
+
 	if err := s.db.QueryRow(
 		`WITH totals AS (
 			SELECT 
 				SUM(CASE WHEN r."type" = 'expense' THEN r.amount ELSE 0 END) AS expense,
 				SUM(CASE WHEN r."type" = 'income' THEN r.amount ELSE 0 END) AS income
 			FROM record r
-			WHERE r.user_id = $1
+			WHERE r.user_id = $1 `+sb.String()+`
 		)
 		SELECT 
 			expense,
 			income,
 			(income - expense) AS total
 		FROM totals`,
-		userId,
+		args...,
 	).Scan(
 		&req.Expense,
 		&req.Income,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
+	apiParams "github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -50,7 +51,9 @@ func GetRecord(c *fiber.Ctx) error {
 func GetRecords(c *fiber.Ctx) error {
 	userId := api.GetUserId(c)
 
-	result, err := Service.getRecords(userId)
+	params := apiParams.GetParams(c)
+
+	result, err := Service.getRecords(userId, params)
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)
 		return api.SendErrorResponse(c, 500, "internal server error")
@@ -88,7 +91,9 @@ func GetSummary(c *fiber.Ctx) error {
 
 	userId := api.GetUserId(c)
 
-	if err := Service.getSummary(req, userId); err != nil {
+	params := apiParams.GetParams(c)
+
+	if err := Service.getSummary(req, userId, params); err != nil {
 		fmt.Printf("ERROR: %v", err)
 		return api.SendErrorResponse(c, 500, "internal server error")
 	}

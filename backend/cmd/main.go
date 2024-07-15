@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"time"
+
 	"github.com/andikaraditya/budget-tracker/backend/internal/category"
+	"github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/andikaraditya/budget-tracker/backend/internal/record"
 	"github.com/andikaraditya/budget-tracker/backend/internal/source"
 	"github.com/andikaraditya/budget-tracker/backend/internal/transfer"
@@ -9,19 +14,34 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/google/uuid"
 )
 
 func main() {
 	app := fiber.New()
 
-	app.Use(logger.New())
+	app.Use(logger.New(logger.Config{
+		Format:        "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${queryParams} | ${error}\n",
+		TimeFormat:    "15:04:05",
+		TimeZone:      "Local",
+		TimeInterval:  500 * time.Millisecond,
+		Output:        os.Stdout,
+		DisableColors: false,
+	}))
+
+	app.Use(recover.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 
 	app.Get("/uuid", func(c *fiber.Ctx) error {
+		params := params.GetParams(c)
+
+		fmt.Println("Pagination: ", params.Page)
+		fmt.Println("Filter: ", params.Filters)
+		fmt.Println("Sort: ", params.Sorts)
 		return c.Status(200).JSON(fiber.Map{
 			"uuid": uuid.NewString(),
 		})

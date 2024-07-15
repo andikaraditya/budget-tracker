@@ -8,6 +8,7 @@ import (
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
 	"github.com/andikaraditya/budget-tracker/backend/internal/db"
+	"github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,7 +16,7 @@ import (
 
 type CategoryService interface {
 	createCategory(req *Category) error
-	getCategories() ([]Category, error)
+	getCategories(params *params.Params) ([]Category, error)
 	getCategory(req *Category) error
 	updateCategory(req *Category, updatedFields []string) error
 }
@@ -65,8 +66,12 @@ func (s *srv) createCategory(req *Category) error {
 	return s.getCategory(req)
 }
 
-func (s *srv) getCategories() ([]Category, error) {
+func (s *srv) getCategories(params *params.Params) ([]Category, error) {
 	var c []Category
+	var sb strings.Builder
+	args := []any{}
+	args = params.ComposeFilter(&sb, args)
+
 	rows, err := s.db.Query(
 		`SELECT 
 			id,
@@ -75,7 +80,9 @@ func (s *srv) getCategories() ([]Category, error) {
 			type,
 			created_at,
 			updated_at
-		FROM category`,
+		FROM category
+		WHERE TRUE `+sb.String()+params.Sorts.Compose()+params.Page.Compose(),
+		args...,
 	)
 	if err != nil {
 		return nil, err
