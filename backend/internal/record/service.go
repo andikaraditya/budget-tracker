@@ -9,7 +9,7 @@ import (
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
 	"github.com/andikaraditya/budget-tracker/backend/internal/db"
-	"github.com/andikaraditya/budget-tracker/backend/internal/params"
+	apiParams "github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -17,10 +17,10 @@ import (
 
 type RecordService interface {
 	createRecord(req *Record) error
-	getRecords(userId string, params *params.Params) ([]Record, error)
+	getRecords(userId string, params *apiParams.Params) ([]Record, error)
 	getRecord(req *Record) error
 	updateRecord(req *Record, updatedFields []string) error
-	getSummary(req *Summary, userId string, params *params.Params) error
+	getSummary(req *Summary, userId string, params *apiParams.Params) error
 }
 
 type srv struct {
@@ -73,7 +73,7 @@ func (s *srv) createRecord(req *Record) error {
 	return s.getRecord(req)
 }
 
-func (s *srv) getRecords(userId string, params *params.Params) ([]Record, error) {
+func (s *srv) getRecords(userId string, params *apiParams.Params) ([]Record, error) {
 	var r []Record
 
 	var sb strings.Builder
@@ -250,7 +250,7 @@ func (s *srv) updateRecord(req *Record, updatedFields []string) error {
 	return s.getRecord(req)
 }
 
-func (s *srv) getSummary(req *Summary, userId string, params *params.Params) error {
+func (s *srv) getSummary(req *Summary, userId string, params *apiParams.Params) error {
 	var sb strings.Builder
 	args := []any{userId}
 	args = params.ComposeFilter(&sb, args)

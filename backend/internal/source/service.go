@@ -9,7 +9,7 @@ import (
 
 	"github.com/andikaraditya/budget-tracker/backend/internal/api"
 	"github.com/andikaraditya/budget-tracker/backend/internal/db"
-	"github.com/andikaraditya/budget-tracker/backend/internal/params"
+	apiParams "github.com/andikaraditya/budget-tracker/backend/internal/params"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -17,7 +17,7 @@ import (
 
 type SourceService interface {
 	createSource(req *Source) error
-	getSources(userId string, params *params.Params) ([]Source, error)
+	getSources(userId string, params *apiParams.Params) ([]Source, error)
 	getSource(req *Source, userId string) error
 	updateSource(req *Source, updatedFields []string) error
 }
@@ -84,7 +84,7 @@ func (s *srv) createSource(req *Source) error {
 	return s.getSource(req, req.UserId)
 }
 
-func (s *srv) getSources(userId string, params *params.Params) ([]Source, error) {
+func (s *srv) getSources(userId string, params *apiParams.Params) ([]Source, error) {
 	result := []Source{}
 
 	var sb strings.Builder
