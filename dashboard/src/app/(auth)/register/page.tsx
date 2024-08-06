@@ -36,7 +36,7 @@ function RegisterPage() {
     <main className="w-[100vw] h-[100vh] flex justify-center items-center">
       <form
         onSubmit={submit}
-        className="min-w-[400px] min-h-[600px] p-6 border-4 border-slate-700 rounded-2xl"
+        className="w-[80%] md:max-w-[400px] min-h-[600px] p-6 border-4 border-slate-700 rounded-2xl"
       >
         <h1 className="text-4xl my-3 text-center text-slate-700 font-extrabold">
           Register
