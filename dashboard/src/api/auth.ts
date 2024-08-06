@@ -1,6 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 import { apiResponse } from "./api";
+import { redirect } from "next/navigation";
 
 type LoginInput = {
   email: string;
@@ -70,4 +71,10 @@ export async function fetchRegister(input: RegisterInput) {
     };
   }
   return response;
+}
+
+export async function handleLogout() {
+  const cookieStore = cookies();
+  cookieStore.delete("token");
+  redirect("/login");
 }
