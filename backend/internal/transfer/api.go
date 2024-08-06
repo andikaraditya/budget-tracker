@@ -15,7 +15,7 @@ func CreateTransfer(c *fiber.Ctx) error {
 	req.UserId = api.GetUserId(c)
 
 	if err := c.BodyParser(req); err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
 	validationError := api.ValidateRequest(req)
@@ -27,7 +27,7 @@ func CreateTransfer(c *fiber.Ctx) error {
 
 	err := Service.createTransfer(req)
 	if err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 	return c.Status(201).JSON(req)
 }
@@ -68,7 +68,7 @@ func UpdateTransfer(c *fiber.Ctx) error {
 	req := new(Transfer)
 
 	if err := c.BodyParser(req); err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
 	updatedFields, err := api.GetUpdatedField(c.BodyRaw())

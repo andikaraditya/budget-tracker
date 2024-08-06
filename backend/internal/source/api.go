@@ -13,7 +13,7 @@ func CreateSource(c *fiber.Ctx) error {
 	req := new(Source)
 
 	if err := c.BodyParser(req); err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
 	validationError := api.ValidateRequest(req)
@@ -25,7 +25,7 @@ func CreateSource(c *fiber.Ctx) error {
 
 	err := Service.createSource(req)
 	if err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 	return c.Status(201).JSON(req)
 }
@@ -66,7 +66,7 @@ func UpdateSource(c *fiber.Ctx) error {
 	req := new(Source)
 
 	if err := c.BodyParser(req); err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
 	updatedFields, err := api.GetUpdatedField(c.BodyRaw())
