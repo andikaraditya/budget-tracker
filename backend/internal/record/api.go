@@ -13,7 +13,7 @@ func CreateRecord(c *fiber.Ctx) error {
 	req := new(Record)
 
 	if err := c.BodyParser(req); err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
 	req.UserId = api.GetUserId(c)
@@ -25,7 +25,7 @@ func CreateRecord(c *fiber.Ctx) error {
 
 	err := Service.createRecord(req)
 	if err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 	return c.Status(201).JSON(req)
 }
@@ -66,7 +66,7 @@ func UpdateRecord(c *fiber.Ctx) error {
 	req := new(Record)
 
 	if err := c.BodyParser(req); err != nil {
-		return c.Status(500).SendString("internal server error")
+		return api.SendErrorResponse(c, 500, "internal server error")
 	}
 
 	updatedFields, err := api.GetUpdatedField(c.BodyRaw())
